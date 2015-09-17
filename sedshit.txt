@@ -1,0 +1,3 @@
+cat sampletweet.txt | sed s/^/\{/ | sed s/\ \ \ \ \ \ \ /\:/ | sed s/$/\}\,/ | sed s/^\}\,/\}\,\{/ | sed /\{\}\,/s/.*/\}\,\{/ | sed s/^\{/\{\ /
+
+grep -we '^W      ' sampletweet.txt | sed 's/W       //' | sed 's/\(.*\)/\{ \"tweet\" \: \"\1\" \}/'

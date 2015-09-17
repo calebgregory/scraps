@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>D3 Page Template</title>
+        <script type="text/javascript" src="./d3/d3.js"></script>
+        <style>
+          .axis path,
+          .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+          }
+
+          .axis text {
+            font-family: sans-serif;
+            font-size: 11px;
+          }
+
+          rect:hover {
+            fill: orange;
+          }
+
+          svg text {
+            pointer-events: none;
+          }
+
+          #tooltip {
+            position: absolute;
+            width: 200px;
+            height: auto;
+            padding: 10px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.4);
+            pointer-events: none;
+          }
+
+          #tooltip.hidden {
+            display: none;
+          }
+
+          #tooltip p {
+            margin: 0;
+            font-family: sans-serif;
+            font-size: 16px;
+            line-height: 20px;
+          }
+        </style>
+    </head>
+    <body>
+      <p id="newdata">click on this text to update the chart with new data values.</p>
+      <p id="add">click here to add a value</p>
+      <p id="remove">click here to remove a value</p>
+      <div id="tooltip" class="hidden">
+        <p><strong>Important Label Heading</strong></p>
+        <p><span id="value">100</span></p>
+      </div>
+        <script type="text/javascript">
+          var dataset = [ { key: 0, value: 5 },
+                          { key: 1, value: 10 },
+                          { key: 2, value: 13 },
+                          { key: 3, value: 19 },
+                          { key: 4, value: 21 },
+                          { key: 5, value: 25 },
+                          { key: 6, value: 22 },
+                          { key: 7, value: 18 },
+                          { key: 8, value: 15 },
+                          { key: 9, value: 13 },
+                          { key: 10, value: 11 },
+                          { key: 11, value: 12 },
+                          { key: 12, value: 15 },
+                          { key: 13, value: 20 },
+                          { key: 14, value: 18 },
+                          { key: 15, value: 17 },
+                          { key: 16, value: 16 },
+                          { key: 17, value: 18 },
+                          { key: 18, value: 23 },
+                          { key: 19, value: 25 } ];
+              w = 600,
+              h = 250,
+              barPadding = 1,
+              sortOrder = false,
+              key = function(d) { return d.key; },
+              xScale = d3.scale.ordinal()
+                         .domain(d3.range(dataset.length))
+                         .rangeRoundBands([0,w], 0.05),
+              yScale = d3.scale.linear()
+                         .domain([0,d3.max(dataset, function(d) {
+                              return d.value; })])
+                         .range([0,h]);
+              svg = d3.select("body")
+                      .append("svg")
+                      .attr({
+                        width : w,
+                        height: h
+                      });
+          svg.selectAll("rect")
+             .data(dataset,key)
+             .enter()
+             .append("rect")
+             .attr({
+               x : function(d,i) { return xScale(i); },
+               y : function(d) { return h - yScale(d.value); },
+               width : xScale.rangeBand(),
+               height: function(d) { return yScale(d.value); },
+               fill : function(d) { return "rgb(0,0," + d.value*10 + ")"; }
+             })
+             .on("click", function() { sortBars(); })
+             .on("mouseover", function(d) {
+               var xPos = parseFloat(d3.select(this).attr("x")) + xScale.rangeBand()/2;
+               var yPos = parseFloat(d3.select(this).attr("y"))/2 + h/2;
+               d3.select("#tooltip")
+                 .style("left", xPos + "px")
+                 .style("top", yPos + "px")
+                 .select("#value")
+                 .text(d.value);
+               d3.select("#tooltip").classed("hidden", false);
+             })
+             .on("mouseout", function() {
+               d3.select("#tooltip").classed("hidden", true);
+             });
+          d3.selectAll("p")
+            .on("click", function() {
+              var pID = d3.select(this).attr("id");
+              console.log(pID);
+              if (pID === "add") {
+                var maxValue = 25,
+                    newNum = Math.floor(Math.random() * maxValue),
+                    lastKeyVal = dataset[dataset.length - 1].key;
+                dataset.push({
+                  key : lastKeyVal + 1,
+                  value : newNum
+                });
+              } else if (pID === "remove") {
+                dataset.shift();
+              } else { // pID === "newdata"
+                var numValues = dataset.length,
+                    maxValue  = 25;
+                dataset = [];
+                for (var i = 0; i < numValues; i++) {
+                  var newNum = Math.floor(Math.random() * maxValue);
+                  dataset.push({
+                    key : i,
+                    value : newNum
+                  });
+                }
+              }
+              console.log(dataset);
+
+              xScale.domain(d3.range(dataset.length));
+              yScale.domain([0,d3.max(dataset,
+                  function(d) { return d.value; })]);
+
+              var bars = svg.selectAll("rect")
+                            .data(dataset,key);
+              bars.enter()
+                  .append("rect")
+                  .attr({
+                    x : w,
+                    y : function(d) { return h - yScale(d.value); },
+                    width : xScale.rangeBand(),
+                    height: function(d) { return yScale(d.value); },
+                    "fill": function(d) { return "rgb(0,0," + d.value*10 + ")"; }
+                  })
+                  .on("click", function() { sortBars(); });
+              var text = svg.selectAll("text")
+                            .data(dataset,key);
+              text.enter()
+                  .append("text")
+                  .text(function(d) { return d.value; })
+                  .attr({
+                    "text-anchor" : "middle",
+                    x : function(d) { return w + xScale.rangeBand()/2; },
+                    y : function(d) { return h - yScale(d.value) + 14; },
+                    "font-family" : "sans-serif",
+                    "font-size"   : "11px",
+                    "fill"        : "white"
+                  });
+              bars.transition()
+                  .duration(500)
+                  .attr({
+                    x : function(d,i) { return xScale(i); },
+                    y : function(d) { return h - yScale(d.value); },
+                    width : xScale.rangeBand(),
+                    height: function(d) { return yScale(d.value); },
+                    "fill": function(d) { return "rgb(0,0," + d.value*10 + ")"; }
+                  });
+              svg.selectAll("text")
+                 .data(dataset,key)
+                 .transition()
+                 .duration(500)
+                 .text(function(d) { return d.value; })
+                 .attr({
+                    x : function(d,i) { return xScale(i) + xScale.rangeBand()/2; },
+                    y : function(d) { return h - yScale(d.value) + 14; }
+                  });
+              bars.exit()
+                  .transition()
+                  .duration(500)
+                  .attr("x", -xScale.rangeBand())
+                  .remove();
+              text.exit()
+                  .transition()
+                  .duration(500)
+                  .attr("x",-xScale.rangeBand())
+                  .remove();
+            });
+          var sortBars = function() {
+            sortOrder = !sortOrder;
+            svg.selectAll("rect")
+              .sort(function(a,b) {
+                if (sortOrder) {
+                  return d3.ascending(a.value,b.value);
+                } else {
+                  return d3.descending(a.value,b.value);
+                }
+              })
+              .transition()
+              .delay(function(d,i) { return i*50; })
+              .duration(1000)
+              .attr("x", function(d,i) { return xScale(i); });
+          };
+        </script>
+
+      <p id="newplotdata">click here for new plotted dot data</p>
+        <script type="text/javascript">
+          // dot plot
+//          var dataset = [],
+//              numDataPoints = 50,
+//              xRange = Math.random() * 1000,
+//              yRange = Math.random() * 1000;
+//          for (var i = 0; i < numDataPoints; i++) {
+//            var n1 = Math.floor(Math.random() * xRange),
+//                n2 = Math.floor(Math.random() * yRange);
+//            dataset.push([n1,n2]);
+//          }
+//          console.log(dataset);
+//
+//          var w = 1000,
+//              h = 600,
+//              padding = 30,
+//              xScale = d3.scale.linear()
+//                         .domain([0,d3.max(dataset,
+//                               function(d) { return d[0]; })])
+//                         .range([padding, w - padding * 2]),
+//              yScale = d3.scale.linear()
+//                         .domain([0,d3.max(dataset,
+//                               function(d) { return d[1]; })])
+//                         .range([h - padding, padding]),
+//              rScale = d3.scale.linear()
+//                         .domain([0, d3.max(dataset,
+//                               function(d) { return d[1]; })])
+//                         .range([2,5]),
+//              svg = d3.select("body")
+//                      .append("svg")
+//                      .attr({
+//                        width : w,
+//                        height: h
+//                      }),
+//              formatAsPercentage = d3.format(".1%"),
+//              xAxis = d3.svg.axis()
+//                            .scale(xScale)
+//                            .orient("bottom")
+//                            .ticks(5),
+//              yAxis = d3.svg.axis()
+//                            .scale(yScale)
+//                            .orient("left")
+//                            .ticks(5);
+//
+//          svg.append("clipPath")
+//             .attr("id", "chart-area")
+//             .append("rect")
+//             .attr({
+//               x : padding,
+//               y : padding,
+//               width : w - padding * 3,
+//               height: h - padding * 2
+//             })
+//
+//          svg.append("g")
+//             .attr({
+//               id : "circles",
+//               "clip-path" : "url(#chart-area)"
+//             })
+//             .selectAll("circle")
+//             .data(dataset)
+//             .enter()
+//             .append("circle")
+//             .attr({
+//               cx : function(d) { return xScale(d[0]); },
+//               cy : function(d) { return yScale(d[1]); },
+//               r  : 5,
+//               "fill" : "black"
+//             });
+////          svg.selectAll("text")
+////             .data(dataset)
+////             .enter()
+////             .append("text")
+////             .text(function(d) { return d[0] + "," + d[1]; })
+////             .attr({
+////               x : function(d) { return xScale(d[0]); },
+////               y : function(d) { return yScale(d[1]); },
+////               "font-family" : "sans-serif",
+////               "font-size"   : "11px",
+////               "fill"        : "teal"
+////               });
+//          svg.append("g")
+//              .attr({
+//                class : "x axis",
+//                transform : "translate(0," + (h - padding) + ")"
+//              })
+//             .call(xAxis);
+//
+//          svg.append("g")
+//             .attr({
+//               class : "y axis",
+//               transform : "translate(" + padding + ",0)"
+//             })
+//             .call(yAxis);
+//
+//          d3.select("#newplotdata")
+//            .on("click", function() {
+//              dataset = [];
+//              var numDataPoints = 50,
+//                  maxRange = Math.random() * 1000;
+//              for (var i = 0; i < numDataPoints; i++) {
+//                var n1 = Math.floor(Math.random() * maxRange),
+//                    n2 = Math.floor(Math.random() * maxRange);
+//                dataset.push([n1,n2]);
+//              }
+//
+//              xScale.domain([0, d3.max(dataset,
+//                  function(d) { return d[0]; })]);
+//              yScale.domain([0, d3.max(dataset,
+//                  function(d) { return d[1]; })]);
+//              svg.selectAll("circle")
+//                 .data(dataset)
+//                 .transition()
+//                 .delay(function(d,i){
+//                   return i/dataset.length * 1000;
+//                 })
+//                 .duration(500)
+//                 .each("start", function() {
+//                   d3.select(this)
+//                     .attr({
+//                       "fill" : "magenta",
+//                       r      : 11
+//                     });
+//                 })
+//                 .attr({
+//                   cx : function(d) { return xScale(d[0]) },
+//                   cy : function(d) { return yScale(d[1]) }
+//                 })
+//                 .transition()
+//                 .duration(1000)
+//                 .attr({
+//                   "fill" : "black",
+//                   r      : 7
+//                 });
+//
+//              svg.select(".x.axis")
+//                 .transition()
+//                 .duration(1000)
+//               .call(xAxis);
+//
+//              svg.select(".y.axis")
+//                 .transition()
+//                 .duration(1000)
+//               .call(yAxis);
+//            });
+        </script>
+    </body>
+</html>

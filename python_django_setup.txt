@@ -1,0 +1,14 @@
+$ sudo apt-get install python-setuptools
+$ sudo easy_install virtualenv
+
+$ virtualenv --no-site-packages django-caleb
+
+source django-caleb/bin/activate
+// change context to folder in virtual environment
+// any packages installed will be installed into virtual env
+
+$ easy_install Django
+
+$ django-admin.py startproject django_test
+
+$ python manage.py runserver

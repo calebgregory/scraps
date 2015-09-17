@@ -1,0 +1,69 @@
+#packages recommended by Andrew :
+  - nltk
+    [link](http://www.nltk.org/)
+  - gensim
+    [link](https://radimrehurek.com/gensim/intro.html)
+  - polyglot
+    [link](http://polyglot.readthedocs.org/en/latest/Installation.html#get-the-bleeding-edge-version)
+
+#datasets for training :
+  - movie reviews
+    a popular training set for sentiment analysis is the large movie
+review dataset
+    [link](http://ai.stanford.edu/~amaas/data/sentiment/)
+
+#tools :
+  - jupyter [notebook] <-- use for python
+    [link](https://jupyter.org/)
+
+##sample usage of jupyter with nltk:
+
+```
+nltk.download_gui()
+
+import numpy as mp
+import nltk
+
+sentence = """At eight o'clock on Thursday morning in Chicago, Arthur
+didn't feel very good."""
+
+tokens = nltk.word_tokenize(sentence)
+tagged = nltk.pos_tag(tokens)
+
+tagged
+ => [('At', 'IN'),
+     ('eight', 'CD'),
+     ("o'clock", 'JJ'),
+     ('on', 'IN'),
+     ('Thursday', 'NNP'),
+     ('morning', 'NN'),
+     ('in', 'IN'),
+     ('Chicago', 'NNP'),
+     (',', ','),
+     ('Arthur', 'NNP'),
+     ('did', 'VBD'),
+     ("n't", 'RB'),
+     ('feel', 'VB'),
+     ('very', 'RB'),
+     ('good', 'JJ'),
+     ('.', '.')]
+
+entities = nltk.chunk.ne_chunk(tagged)
+list(entities)
+ => [('At', 'IN'),
+     ('eight', 'CD'),
+     ("o'clock", 'JJ'),
+     ('on', 'IN'),
+     ('Thursday', 'NNP'),
+     ('morning', 'NN'),
+     ('in', 'IN'),
+     Tree('GPE', [('Chicago', 'NNP')]),
+     (',', ','),
+     Tree('PERSON', [('Arthur', 'NNP')]),
+     ('did', 'VBD'),
+     ("n't", 'RB'),
+     ('feel', 'VB'),
+     ('very', 'RB'),
+     ('good', 'JJ'),
+     ('.', '.')]
+```

@@ -1,0 +1,2 @@
+2015-09-14T21:18:27.678-0500 I STORAGE  [initandlisten] exception in initAndListen: 98 Unable to create/open lock file: /data/rs1/mongod.lock errno:13 Permission denied Is a mongod instance already running?, terminating
+2015-09-14T21:18:27.678-0500 I CONTROL  [initandlisten] dbexit:  rc: 100

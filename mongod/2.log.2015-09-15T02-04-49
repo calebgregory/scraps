@@ -1,0 +1,2 @@
+2015-09-14T21:03:45.726-0500 I STORAGE  [initandlisten] exception in initAndListen: 29 Data directory /data/rs2 not found., terminating
+2015-09-14T21:03:45.726-0500 I CONTROL  [initandlisten] dbexit:  rc: 100
